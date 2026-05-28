@@ -1,6 +1,7 @@
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, TrainFront } from "lucide-react";
 
 export interface Seat {
+  train: string;
   coach: string;
   seatNumber: string;
   berth: string;
@@ -31,6 +32,11 @@ export function SeatCard({ seat, index }: { seat: Seat; index: number }) {
       }}
     >
       <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+
+      <div className="flex items-center gap-1.5 mb-3 text-[10px] uppercase tracking-widest text-muted-foreground">
+        <TrainFront className="h-3 w-3 text-primary" />
+        <span className="font-semibold text-foreground/80 truncate">{seat.train}</span>
+      </div>
 
       <div className="flex items-start justify-between gap-3 relative">
         <div className="flex items-center gap-3">
