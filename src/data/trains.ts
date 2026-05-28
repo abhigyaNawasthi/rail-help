@@ -133,9 +133,7 @@ export function findTrain(query: string): TrainData | null {
 // vibe helpers
 export function confidenceVibe(c: number): { label: string; tone: "hi" | "mid" | "lo" } {
   if (c >= 85) return { label: "W seat fr 🔥", tone: "hi" };
-  if (c >= 70) return { label: "lowkey valid 👀", tone: "hi" };
-  if (c >= 55) return { label: "might pop off 🤞", tone: "mid" };
-  if (c >= 40) return { label: "kinda mid ngl", tone: "mid" };
+  if (c >= 65) return { label: "might be valid 👀", tone: "mid" };
   return { label: "hell nah gang 😭", tone: "lo" };
 }
 
