@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Train, MapPin, Search, Sofa, TrainFront } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Train, MapPin, Search, Sofa, TrainFront, Route as RouteIcon } from "lucide-react";
 import { SeatCard, type Seat } from "@/components/SeatCard";
-import {
-  TrainAutocomplete,
-  type TrainOption,
-} from "@/components/TrainAutocomplete";
+import { TrainAutocomplete } from "@/components/TrainAutocomplete";
+import { TRAINS, findTrain, LOADING_LINES, EMPTY_LINES } from "@/data/trains";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,73 +24,47 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const STATIONS = [
-  "New Delhi (NDLS)",
-  "Mumbai Central (BCT)",
-  "Howrah Jn (HWH)",
-  "Chennai Central (MAS)",
-  "Bengaluru (SBC)",
-  "Hyderabad Deccan (HYB)",
-  "Pune Jn (PUNE)",
-  "Ahmedabad Jn (ADI)",
-  "Jaipur Jn (JP)",
-  "Lucknow (LKO)",
-  "Patna Jn (PNBE)",
-  "Bhopal Jn (BPL)",
-];
-
-const COACHES = ["S1", "S2", "S3", "S4", "S5", "B1", "B2", "B3", "A1", "A2"];
-
-const TRAINS: TrainOption[] = [
-  { number: "12951", name: "Rajdhani Express", route: "NDLS → BCT" },
-  { number: "22435", name: "Vande Bharat Express", route: "NDLS → BSB" },
-  { number: "12230", name: "Lucknow Mail", route: "NDLS → LKO" },
-  { number: "12002", name: "Bhopal Shatabdi", route: "NDLS → HBJ" },
-  { number: "12259", name: "Sealdah Duronto", route: "NDLS → SDAH" },
-  { number: "12622", name: "Tamil Nadu Express", route: "NDLS → MAS" },
-  { number: "12009", name: "Mumbai Shatabdi", route: "BCT → ADI" },
-  { number: "12309", name: "Rajendra Nagar Rajdhani", route: "NDLS → RJPB" },
-  { number: "12423", name: "Dibrugarh Rajdhani", route: "NDLS → DBRG" },
-  { number: "12626", name: "Kerala Express", route: "NDLS → TVC" },
-  { number: "12903", name: "Golden Temple Mail", route: "BCT → ASR" },
-  { number: "12313", name: "Sealdah Rajdhani", route: "NDLS → SDAH" },
-  { number: "22691", name: "Rajdhani Express", route: "SBC → NZM" },
-  { number: "12565", name: "Bihar Sampark Kranti", route: "DBG → NDLS" },
-  { number: "12869", name: "Howrah CSMT Express", route: "HWH → CSMT" },
-];
-
-const MOCK_SEATS: Seat[] = [
-  { train: "12951 Rajdhani Express",  coach: "B1", seatNumber: "12", berth: "Lower",       vacantTill: "Kota Jn",         fromStation: "New Delhi",   confidence: 94 },
-  { train: "12951 Rajdhani Express",  coach: "A1", seatNumber: "07", berth: "Lower",       vacantTill: "Mumbai Central",  fromStation: "New Delhi",   confidence: 96 },
-  { train: "22435 Vande Bharat",      coach: "C3", seatNumber: "24", berth: "Window",      vacantTill: "Kanpur Central",  fromStation: "New Delhi",   confidence: 91 },
-  { train: "22435 Vande Bharat",      coach: "C5", seatNumber: "48", berth: "Aisle",       vacantTill: "Prayagraj Jn",    fromStation: "New Delhi",   confidence: 88 },
-  { train: "12230 Lucknow Mail",      coach: "S4", seatNumber: "34", berth: "Middle",      vacantTill: "Aligarh Jn",      fromStation: "New Delhi",   confidence: 78 },
-  { train: "12230 Lucknow Mail",      coach: "S7", seatNumber: "41", berth: "Side Upper",  vacantTill: "Lucknow Nr",      fromStation: "New Delhi",   confidence: 83 },
-  { train: "12002 Shatabdi Express",  coach: "E2", seatNumber: "19", berth: "Window",      vacantTill: "Gwalior Jn",      fromStation: "New Delhi",   confidence: 90 },
-  { train: "12259 Sealdah Duronto",   coach: "B3", seatNumber: "22", berth: "Side Lower",  vacantTill: "Patna Jn",        fromStation: "New Delhi",   confidence: 86 },
-  { train: "12622 Tamil Nadu Express",coach: "A2", seatNumber: "11", berth: "Upper",       vacantTill: "Nagpur Jn",       fromStation: "New Delhi",   confidence: 92 },
-  { train: "12009 Mumbai Shatabdi",   coach: "C1", seatNumber: "29", berth: "Window",      vacantTill: "Surat",           fromStation: "Mumbai Central", confidence: 81 },
-];
-
-function getMockSeats(_coach: string, _station: string): Seat[] {
-  return MOCK_SEATS;
-}
-
 function Index() {
-  const [train, setTrain] = useState("");
-  const [from, setFrom] = useState(STATIONS[0]);
-  const [coach, setCoach] = useState("S4");
+  const defaultTrain = TRAINS[0];
+  const [train, setTrain] = useState(`${defaultTrain.number} ${defaultTrain.name}`);
+  const selectedTrain = useMemo(
+    () => findTrain(train) ?? defaultTrain,
+    [train, defaultTrain],
+  );
+  const stations = selectedTrain.stations;
+  const coaches = selectedTrain.coaches;
+
+  const [from, setFrom] = useState(stations[0]);
+  const [coach, setCoach] = useState<string>("ALL");
   const [results, setResults] = useState<Seat[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingLine, setLoadingLine] = useState(LOADING_LINES[0]);
+
+  useEffect(() => {
+    setCoach("ALL");
+    setFrom(selectedTrain.stations[0]);
+    setResults(null);
+  }, [selectedTrain.number, selectedTrain.stations]);
 
   const onSearch = () => {
     setLoading(true);
     setResults(null);
+    setLoadingLine(
+      LOADING_LINES[Math.floor(Math.random() * LOADING_LINES.length)],
+    );
     setTimeout(() => {
-      setResults(getMockSeats(coach, from));
+      const all = selectedTrain.seats;
+      const filtered =
+        coach === "ALL" ? all : all.filter((s) => s.coach === coach);
+      setResults(filtered);
       setLoading(false);
     }, 700);
   };
+
+  const emptyLine = useMemo(
+    () => EMPTY_LINES[Math.floor(Math.random() * EMPTY_LINES.length)],
+    [],
+  );
 
   const headerStats = useMemo(
     () => [
@@ -129,7 +101,7 @@ function Index() {
         <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-success/15 border border-success/30">
           <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
           <span className="text-[10px] font-bold text-success uppercase tracking-wider">
-            Live
+            live af
           </span>
         </div>
       </header>
@@ -147,8 +119,8 @@ function Index() {
           before you board.
         </h2>
         <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-          Crowdsourced vacancy data for Indian Railways — coach by coach,
-          station by station. no cap.
+          crowdsourced vacancy intel for Indian Railways — coach by coach,
+          station by station. no cap, big W energy. 🚆
         </p>
 
         <div className="flex gap-2 mt-4">
@@ -175,7 +147,7 @@ function Index() {
           boxShadow: "var(--shadow-3d)",
         }}
       >
-        <Field icon={<Train className="h-4 w-4" />} label="Train — drop the digits">
+        <Field icon={<Train className="h-4 w-4" />} label="train — drop the digits">
           <TrainAutocomplete
             value={train}
             onChange={setTrain}
@@ -185,13 +157,13 @@ function Index() {
           />
         </Field>
 
-        <Field icon={<MapPin className="h-4 w-4" />} label="Boarding station">
+        <Field icon={<MapPin className="h-4 w-4" />} label="boarding stn — where u hopping on">
           <select
             value={from}
             onChange={(e) => setFrom(e.target.value)}
             className="w-full bg-transparent outline-none text-base font-semibold appearance-none cursor-pointer"
           >
-            {STATIONS.map((s) => (
+            {stations.map((s) => (
               <option key={s} value={s} className="bg-card text-foreground">
                 {s}
               </option>
@@ -199,12 +171,14 @@ function Index() {
           </select>
         </Field>
 
+        <RouteProgress stations={stations} active={from} />
+
         <div className="mb-4">
           <label className="text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 mb-2">
-            <Sofa className="h-3 w-3" /> Coach
+            <Sofa className="h-3 w-3" /> coach — pick ur whip
           </label>
           <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-1 no-scrollbar">
-            {COACHES.map((c) => {
+            {["ALL", ...coaches].map((c) => {
               const active = c === coach;
               return (
                 <button
@@ -242,7 +216,7 @@ function Index() {
           }}
         >
           <Search className="h-5 w-5" />
-          {loading ? "scanning, hold up…" : "spot empty seats"}
+          {loading ? loadingLine : "clock empty seats 👀"}
         </button>
       </section>
 
@@ -250,11 +224,13 @@ function Index() {
       <section>
         <div className="flex items-baseline justify-between mb-3 px-1">
           <h3 className="text-sm font-bold uppercase tracking-wider">
-            {results ? `${results.length} vacant in ${coach}` : "Recent scans"}
+            {results
+              ? `${results.length} seats secured${coach !== "ALL" ? ` · ${coach}` : ""} 🔓`
+              : "recent scans"}
           </h3>
           {results && (
             <span className="text-[10px] text-muted-foreground">
-              updated just now
+              fresh outta the oven
             </span>
           )}
         </div>
@@ -271,11 +247,22 @@ function Index() {
           </div>
         )}
 
-        {!loading && results && (
+        {!loading && results && results.length > 0 && (
           <div className="space-y-3">
             {results.map((s, i) => (
               <SeatCard key={i} seat={s} index={i} />
             ))}
+          </div>
+        )}
+
+        {!loading && results && results.length === 0 && (
+          <div
+            className="rounded-3xl p-6 border border-dashed border-border/60 text-center"
+            style={{ background: "oklch(0.12 0.018 260 / 0.4)" }}
+          >
+            <p className="text-sm text-muted-foreground">
+              nah this coach cooked 😭 — try another one bestie
+            </p>
           </div>
         )}
 
@@ -284,13 +271,68 @@ function Index() {
             className="rounded-3xl p-6 border border-dashed border-border/60 text-center"
             style={{ background: "oklch(0.12 0.018 260 / 0.4)" }}
           >
-            <p className="text-sm text-muted-foreground">
-              Tap <span className="text-primary font-semibold">Find vacant seats</span>{" "}
-              to scan coach <span className="font-bold">{coach}</span>.
-            </p>
+            <p className="text-sm text-muted-foreground">{emptyLine}</p>
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function RouteProgress({
+  stations,
+  active,
+}: {
+  stations: string[];
+  active: string;
+}) {
+  const activeIdx = Math.max(0, stations.indexOf(active));
+  const pct =
+    stations.length > 1 ? (activeIdx / (stations.length - 1)) * 100 : 0;
+  return (
+    <div className="mb-4 px-1">
+      <div className="flex items-center gap-1.5 mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+        <RouteIcon className="h-3 w-3" /> route — big W ride
+      </div>
+      <div className="relative h-1.5 rounded-full bg-border/40 overflow-hidden mb-2">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-500"
+          style={{
+            width: `${pct}%`,
+            background: "var(--gradient-hero)",
+            boxShadow: "var(--shadow-glow)",
+          }}
+        />
+      </div>
+      <div className="flex justify-between gap-1">
+        {stations.map((s, i) => {
+          const passed = i <= activeIdx;
+          const code = s.match(/\(([^)]+)\)/)?.[1] ?? s.slice(0, 3).toUpperCase();
+          return (
+            <div
+              key={s}
+              className="flex flex-col items-center gap-1 flex-1 min-w-0"
+            >
+              <span
+                className="h-2 w-2 rounded-full transition-all"
+                style={{
+                  background: passed
+                    ? "var(--gradient-hero)"
+                    : "oklch(0.3 0.02 260)",
+                  boxShadow: passed ? "var(--shadow-glow)" : "none",
+                }}
+              />
+              <span
+                className={`text-[9px] font-bold tracking-wider truncate ${
+                  passed ? "text-foreground" : "text-muted-foreground/60"
+                }`}
+              >
+                {code}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

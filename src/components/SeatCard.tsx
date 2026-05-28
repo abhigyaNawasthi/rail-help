@@ -1,4 +1,5 @@
 import { ArrowRight, Sparkles, TrainFront } from "lucide-react";
+import { confidenceVibe } from "@/data/trains";
 
 export interface Seat {
   train: string;
@@ -20,6 +21,13 @@ export function SeatCard({ seat, index }: { seat: Seat; index: number }) {
       : conf >= 65
         ? "bg-warning/15 border-warning/30"
         : "bg-accent/15 border-accent/30";
+  const vibe = confidenceVibe(conf);
+  const glow =
+    conf >= 85
+      ? "0 0 24px oklch(0.78 0.18 145 / 0.5)"
+      : conf >= 65
+        ? "0 0 24px oklch(0.78 0.18 70 / 0.45)"
+        : "0 0 24px oklch(0.68 0.2 25 / 0.4)";
 
   return (
     <div
@@ -73,6 +81,7 @@ export function SeatCard({ seat, index }: { seat: Seat; index: number }) {
 
         <div
           className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border ${confBg}`}
+          style={{ boxShadow: glow }}
         >
           <Sparkles className={`h-3 w-3 ${confColor}`} />
           <span className={`text-xs font-bold ${confColor}`}>{conf}%</span>
@@ -81,11 +90,22 @@ export function SeatCard({ seat, index }: { seat: Seat; index: number }) {
 
       <div className="mt-4 pt-4 border-t border-dashed border-border/60 relative">
         <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-          Vacant till
+          Vacant till — <span className="text-foreground/80 normal-case tracking-normal">{vibe.label}</span>
         </p>
         <div className="flex items-center gap-2">
           <ArrowRight className="h-4 w-4 text-primary" />
           <span className="text-base font-semibold">{seat.vacantTill}</span>
+        </div>
+
+        <div className="mt-3 h-1.5 rounded-full bg-border/40 overflow-hidden">
+          <div
+            className="h-full rounded-full transition-[width] duration-700"
+            style={{
+              width: `${conf}%`,
+              background: "var(--gradient-hero)",
+              boxShadow: glow,
+            }}
+          />
         </div>
       </div>
 
