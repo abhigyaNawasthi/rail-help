@@ -24,73 +24,47 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const STATIONS = [
-  "New Delhi (NDLS)",
-  "Mumbai Central (BCT)",
-  "Howrah Jn (HWH)",
-  "Chennai Central (MAS)",
-  "Bengaluru (SBC)",
-  "Hyderabad Deccan (HYB)",
-  "Pune Jn (PUNE)",
-  "Ahmedabad Jn (ADI)",
-  "Jaipur Jn (JP)",
-  "Lucknow (LKO)",
-  "Patna Jn (PNBE)",
-  "Bhopal Jn (BPL)",
-];
-
-const COACHES = ["S1", "S2", "S3", "S4", "S5", "B1", "B2", "B3", "A1", "A2"];
-
-const TRAINS: TrainOption[] = [
-  { number: "12951", name: "Rajdhani Express", route: "NDLS → BCT" },
-  { number: "22435", name: "Vande Bharat Express", route: "NDLS → BSB" },
-  { number: "12230", name: "Lucknow Mail", route: "NDLS → LKO" },
-  { number: "12002", name: "Bhopal Shatabdi", route: "NDLS → HBJ" },
-  { number: "12259", name: "Sealdah Duronto", route: "NDLS → SDAH" },
-  { number: "12622", name: "Tamil Nadu Express", route: "NDLS → MAS" },
-  { number: "12009", name: "Mumbai Shatabdi", route: "BCT → ADI" },
-  { number: "12309", name: "Rajendra Nagar Rajdhani", route: "NDLS → RJPB" },
-  { number: "12423", name: "Dibrugarh Rajdhani", route: "NDLS → DBRG" },
-  { number: "12626", name: "Kerala Express", route: "NDLS → TVC" },
-  { number: "12903", name: "Golden Temple Mail", route: "BCT → ASR" },
-  { number: "12313", name: "Sealdah Rajdhani", route: "NDLS → SDAH" },
-  { number: "22691", name: "Rajdhani Express", route: "SBC → NZM" },
-  { number: "12565", name: "Bihar Sampark Kranti", route: "DBG → NDLS" },
-  { number: "12869", name: "Howrah CSMT Express", route: "HWH → CSMT" },
-];
-
-const MOCK_SEATS: Seat[] = [
-  { train: "12951 Rajdhani Express",  coach: "B1", seatNumber: "12", berth: "Lower",       vacantTill: "Kota Jn",         fromStation: "New Delhi",   confidence: 94 },
-  { train: "12951 Rajdhani Express",  coach: "A1", seatNumber: "07", berth: "Lower",       vacantTill: "Mumbai Central",  fromStation: "New Delhi",   confidence: 96 },
-  { train: "22435 Vande Bharat",      coach: "C3", seatNumber: "24", berth: "Window",      vacantTill: "Kanpur Central",  fromStation: "New Delhi",   confidence: 91 },
-  { train: "22435 Vande Bharat",      coach: "C5", seatNumber: "48", berth: "Aisle",       vacantTill: "Prayagraj Jn",    fromStation: "New Delhi",   confidence: 88 },
-  { train: "12230 Lucknow Mail",      coach: "S4", seatNumber: "34", berth: "Middle",      vacantTill: "Aligarh Jn",      fromStation: "New Delhi",   confidence: 78 },
-  { train: "12230 Lucknow Mail",      coach: "S7", seatNumber: "41", berth: "Side Upper",  vacantTill: "Lucknow Nr",      fromStation: "New Delhi",   confidence: 83 },
-  { train: "12002 Shatabdi Express",  coach: "E2", seatNumber: "19", berth: "Window",      vacantTill: "Gwalior Jn",      fromStation: "New Delhi",   confidence: 90 },
-  { train: "12259 Sealdah Duronto",   coach: "B3", seatNumber: "22", berth: "Side Lower",  vacantTill: "Patna Jn",        fromStation: "New Delhi",   confidence: 86 },
-  { train: "12622 Tamil Nadu Express",coach: "A2", seatNumber: "11", berth: "Upper",       vacantTill: "Nagpur Jn",       fromStation: "New Delhi",   confidence: 92 },
-  { train: "12009 Mumbai Shatabdi",   coach: "C1", seatNumber: "29", berth: "Window",      vacantTill: "Surat",           fromStation: "Mumbai Central", confidence: 81 },
-];
-
-function getMockSeats(_coach: string, _station: string): Seat[] {
-  return MOCK_SEATS;
-}
-
 function Index() {
-  const [train, setTrain] = useState("");
-  const [from, setFrom] = useState(STATIONS[0]);
-  const [coach, setCoach] = useState("S4");
+  const defaultTrain = TRAINS[0];
+  const [train, setTrain] = useState(`${defaultTrain.number} ${defaultTrain.name}`);
+  const selectedTrain = useMemo(
+    () => findTrain(train) ?? defaultTrain,
+    [train, defaultTrain],
+  );
+  const stations = selectedTrain.stations;
+  const coaches = selectedTrain.coaches;
+
+  const [from, setFrom] = useState(stations[0]);
+  const [coach, setCoach] = useState<string>("ALL");
   const [results, setResults] = useState<Seat[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingLine, setLoadingLine] = useState(LOADING_LINES[0]);
+
+  useEffect(() => {
+    setCoach("ALL");
+    setFrom(selectedTrain.stations[0]);
+    setResults(null);
+  }, [selectedTrain.number, selectedTrain.stations]);
 
   const onSearch = () => {
     setLoading(true);
     setResults(null);
+    setLoadingLine(
+      LOADING_LINES[Math.floor(Math.random() * LOADING_LINES.length)],
+    );
     setTimeout(() => {
-      setResults(getMockSeats(coach, from));
+      const all = selectedTrain.seats;
+      const filtered =
+        coach === "ALL" ? all : all.filter((s) => s.coach === coach);
+      setResults(filtered);
       setLoading(false);
     }, 700);
   };
+
+  const emptyLine = useMemo(
+    () => EMPTY_LINES[Math.floor(Math.random() * EMPTY_LINES.length)],
+    [],
+  );
 
   const headerStats = useMemo(
     () => [
