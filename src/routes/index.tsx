@@ -67,7 +67,7 @@ function Index() {
     setLoading(true);
     setResults(null);
     setTimeout(() => {
-      setResults(generateSeats(coach, from));
+      setResults(getMockSeats(coach, from));
       setLoading(false);
     }, 700);
   };
