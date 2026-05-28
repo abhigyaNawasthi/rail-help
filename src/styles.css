@@ -160,3 +160,6 @@
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
 }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
