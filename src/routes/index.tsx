@@ -4,6 +4,7 @@ import { Train, MapPin, Search, Sofa, TrainFront, Route as RouteIcon } from "luc
 import { SeatCard, type Seat } from "@/components/SeatCard";
 import { TrainAutocomplete } from "@/components/TrainAutocomplete";
 import { TRAINS, findTrain, LOADING_LINES, EMPTY_LINES } from "@/data/trains";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,13 +26,34 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const defaultTrain = TRAINS[0];
+
+  useEffect(() => {
+    async function testSupabase() {
+      const { data, error } = await supabase
+        .from("train")
+        .select("*");
+  
+      console.log("DATA:", data);
+      console.log("ERROR:", error);
+      if (data) {
+        setDbTrains(data);
+      }
+    }
+  
+    testSupabase();
+  }, []);
+  const [dbTrains, setDbTrains] = useState<any[]>([]);
+  console.log("DB TRAINS STATE:", dbTrains);
+  const defaultTrain = dbTrains[0] ?? TRAINS[0];
   const [train, setTrain] = useState(`${defaultTrain.number} ${defaultTrain.name}`);
   const selectedTrain = useMemo(
     () => findTrain(train) ?? defaultTrain,
     [train, defaultTrain],
   );
-  const stations = selectedTrain.stations;
+  const selectedDbTrain = dbTrains.find(
+    (t) => `${t.number} ${t.name}` === train
+  );
+  const stations = selectedDbTrain?.stations ?? selectedTrain.stations;
   const coaches = selectedTrain.coaches;
 
   const [from, setFrom] = useState(stations[0]);
@@ -101,7 +123,7 @@ function Index() {
         <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-success/15 border border-success/30">
           <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
           <span className="text-[10px] font-bold text-success uppercase tracking-wider">
-            live af
+            live
           </span>
         </div>
       </header>
@@ -120,7 +142,7 @@ function Index() {
         </h2>
         <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
           crowdsourced vacancy intel for Indian Railways — coach by coach,
-          station by station. no cap, big W energy. 🚆
+          station by station. no cap. 
         </p>
 
         <div className="flex gap-2 mt-4">
@@ -152,7 +174,7 @@ function Index() {
             value={train}
             onChange={setTrain}
             onPick={(t) => setTrain(`${t.number} ${t.name}`)}
-            options={TRAINS}
+            options={dbTrains.length > 0 ? dbTrains : TRAINS}
             placeholder="e.g. 12951 or Rajdhani"
           />
         </Field>
@@ -261,7 +283,7 @@ function Index() {
             style={{ background: "oklch(0.12 0.018 260 / 0.4)" }}
           >
             <p className="text-sm text-muted-foreground">
-              nah this coach cooked 😭 — try another one bestie
+              nah this coach cooked  — try another one 
             </p>
           </div>
         )}
@@ -292,7 +314,7 @@ function RouteProgress({
   return (
     <div className="mb-4 px-1">
       <div className="flex items-center gap-1.5 mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-        <RouteIcon className="h-3 w-3" /> route — big W ride
+        <RouteIcon className="h-3 w-3" /> route — big  ride
       </div>
       <div className="relative h-1.5 rounded-full bg-border/40 overflow-hidden mb-2">
         <div
