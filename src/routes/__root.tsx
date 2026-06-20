@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 import { FloatingPathsBackground } from "@/components/FloatingPaths";
@@ -74,15 +75,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "rail help" },
-      { name: "description", content: "Seat Scout is a mobile-first web app for finding vacant train seats." },
+      {
+        name: "description",
+        content: "Seat Scout is a mobile-first web app for finding vacant train seats.",
+      },
       { name: "theme-color", content: "#000000" },
       { name: "author", content: "RailVacant" },
       { property: "og:title", content: "RailVacant" },
-      { property: "og:description", content: "Seat Scout is a mobile-first web app for finding vacant train seats." },
+      {
+        property: "og:description",
+        content: "Seat Scout is a mobile-first web app for finding vacant train seats.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "RailVacant" },
-      { name: "twitter:description", content: "Seat Scout is a mobile-first web app for finding vacant train seats." },
+      {
+        name: "twitter:description",
+        content: "Seat Scout is a mobile-first web app for finding vacant train seats.",
+      },
     ],
     links: [
       {
@@ -106,6 +116,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <Analytics />
       </body>
     </html>
   );

@@ -1,8 +1,5 @@
 import type { Seat } from "@/components/SeatCard";
 
-
-
-
 // vibe helpers
 export function confidenceVibe(c: number): { label: string; tone: "hi" | "mid" | "lo" } {
   if (c >= 85) return { label: "W seat fr 🔥", tone: "hi" };

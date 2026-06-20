@@ -58,11 +58,7 @@ export function TrainAutocomplete({
   const matches = useMemo(() => {
     if (!q) return [];
     return options
-      .filter(
-        (t) =>
-          t.number.toLowerCase().includes(q) ||
-          t.name.toLowerCase().includes(q),
-      )
+      .filter((t) => t.number.toLowerCase().includes(q) || t.name.toLowerCase().includes(q))
       .slice(0, 6);
   }, [q, options]);
 
@@ -131,13 +127,7 @@ export function TrainAutocomplete({
               </div>
               <ul className="pb-1.5">
                 {matches.map((t, i) => (
-                  <Row
-                    key={t.number}
-                    t={t}
-                    onPick={pick}
-                    delay={i * 25}
-                    highlight={q}
-                  />
+                  <Row key={t.number} t={t} onPick={pick} delay={i * 25} highlight={q} />
                 ))}
               </ul>
             </div>
@@ -184,14 +174,12 @@ function Row({
           {t.number}
         </div>
         <div className="min-w-0 flex-1">
-  <p className="text-sm font-semibold truncate">
-    {highlight ? <Highlight text={t.name} q={highlight} /> : t.name}
-  </p>
+          <p className="text-sm font-semibold truncate">
+            {highlight ? <Highlight text={t.name} q={highlight} /> : t.name}
+          </p>
 
-  <p className="text-[11px] text-muted-foreground">
-    Train No. {t.number}
-  </p>
-</div>
+          <p className="text-[11px] text-muted-foreground">Train No. {t.number}</p>
+        </div>
       </button>
     </li>
   );

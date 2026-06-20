@@ -14,13 +14,13 @@ export interface Seat {
 // Lower → LB, Upper → UB, Side Lower → SL, Side Upper → SU, Middle → MB, Window → WS, Aisle → AS
 function berthCode(b: string): string {
   const map: Record<string, string> = {
-    "lower": "LB",
-    "upper": "UB",
-    "middle": "MB",
+    lower: "LB",
+    upper: "UB",
+    middle: "MB",
     "side lower": "SL",
     "side upper": "SU",
-    "window": "WS",
-    "aisle": "AS",
+    window: "WS",
+    aisle: "AS",
   };
   return map[b.toLowerCase()] ?? b.slice(0, 2).toUpperCase();
 }
@@ -44,22 +44,13 @@ const TONE_STYLE: Record<string, string> = {
   ec: "bg-success/15 border-success/40 text-success",
 };
 
-export function SeatCard({
-  seat,
-  index,
-  route,
-}: {
-  seat: Seat;
-  index: number;
-  route?: string[];
-}) {
+export function SeatCard({ seat, index, route }: { seat: Seat; index: number; route?: string[] }) {
   const conf = seat.confidence;
   const cls = coachClass(seat.coach);
   const vibe = confidenceVibe(conf);
 
   // High / Medium / Low tiers
-  const tier: "hi" | "mid" | "lo" =
-    conf >= 85 ? "hi" : conf >= 65 ? "mid" : "lo";
+  const tier: "hi" | "mid" | "lo" = conf >= 85 ? "hi" : conf >= 65 ? "mid" : "lo";
   const tierColor =
     tier === "hi" ? "text-success" : tier === "mid" ? "text-warning" : "text-accent";
   const tierBg =
@@ -115,9 +106,7 @@ export function SeatCard({
       <div className="flex items-center justify-between gap-2 mb-3 relative">
         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground min-w-0">
           <TrainFront className="h-3 w-3 text-primary shrink-0" />
-          <span className="font-semibold text-foreground/80 truncate">
-            {seat.train}
-          </span>
+          <span className="font-semibold text-foreground/80 truncate">{seat.train}</span>
         </div>
         <span
           className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${TONE_STYLE[cls.tone]}`}
@@ -134,16 +123,13 @@ export function SeatCard({
             style={{
               background:
                 "linear-gradient(145deg, oklch(0.22 0.05 70 / 0.6), oklch(0.12 0.02 260))",
-              boxShadow:
-                "0 1px 0 oklch(1 0 0 / 0.1) inset, 0 -2px 4px oklch(0 0 0 / 0.4) inset",
+              boxShadow: "0 1px 0 oklch(1 0 0 / 0.1) inset, 0 -2px 4px oklch(0 0 0 / 0.4) inset",
             }}
           >
             <span className="text-[9px] uppercase tracking-widest text-muted-foreground">
               Coach
             </span>
-            <span className="text-lg font-bold text-primary leading-none">
-              {seat.coach}
-            </span>
+            <span className="text-lg font-bold text-primary leading-none">{seat.coach}</span>
           </div>
           <div className="min-w-0">
             <div className="flex items-baseline gap-1.5">
@@ -190,9 +176,7 @@ export function SeatCard({
         </div>
 
         <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-xs font-bold truncate max-w-[45%]">
-            {seat.fromStation}
-          </span>
+          <span className="text-xs font-bold truncate max-w-[45%]">{seat.fromStation}</span>
           <span className="text-xs font-bold truncate max-w-[50%] text-right">
             {seat.vacantTill}
           </span>

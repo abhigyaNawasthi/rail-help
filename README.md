@@ -6,22 +6,22 @@ RailVacant is a personal project I built to explore React, TypeScript, databases
 
 ## Features
 
-* Train search and autocomplete
-* Station route display
-* Coach-wise seat view
-* Supabase integration
-* RapidAPI integration for Indian Railway data
-* Responsive modern UI
+- Train search and autocomplete
+- Station route display
+- Coach-wise seat view
+- Supabase integration
+- RapidAPI integration for Indian Railway data
+- Responsive modern UI
 
 ## Tech Stack
 
-* React
-* TypeScript
-* TanStack Router
-* Supabase
-* RapidAPI
-* Tailwind CSS
-* Vite
+- React
+- TypeScript
+- TanStack Router
+- Supabase
+- RapidAPI
+- Tailwind CSS
+- Vite
 
 ## Setup
 
@@ -46,17 +46,17 @@ This project is actively being developed and improved as I continue learning ful
 
 Current areas of focus include:
 
-* Improving and refining the UI and user experience
-* Making train information more dynamic
-* Integrating real seat availability data
-* Enhancing search and overall performance
+- Improving and refining the UI and user experience
+- Making train information more dynamic
+- Integrating real seat availability data
+- Enhancing search and overall performance
 
 ## Planned Additions
 
-* Live train status
-* Better search experience
-* Real seat availability integration
-* More dynamic data handling
+- Live train status
+- Better search experience
+- Real seat availability integration
+- More dynamic data handling
 
 ## 👨‍💻 About Me
 

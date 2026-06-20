@@ -9,7 +9,7 @@ export async function getTrainInfo(train: string) {
         "x-rapidapi-key": API_KEY,
         "x-rapidapi-host": API_HOST,
       },
-    }
+    },
   );
 
   const data = await response.json();

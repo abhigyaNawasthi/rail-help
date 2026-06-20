@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Train, MapPin, Search, Sofa, TrainFront, Route as RouteIcon, ArrowRight, Flag, Calendar } from "lucide-react";
+import {
+  Train,
+  MapPin,
+  Search,
+  Sofa,
+  TrainFront,
+  Route as RouteIcon,
+  ArrowRight,
+  Flag,
+  Calendar,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { SeatCard, type Seat } from "@/components/SeatCard";
@@ -32,7 +42,7 @@ function Index() {
   const [train, setTrain] = useState("");
   const [trainName, setTrainName] = useState("");
   const [apiStations, setApiStations] = useState<string[]>([]);
-  
+
   // Step flow state
   const [isVerifying, setIsVerifying] = useState(false);
   const [trainVerified, setTrainVerified] = useState(false);
@@ -84,24 +94,24 @@ function Index() {
     try {
       const data = await getTrainInfo(trainNumber);
       const trainData = data?.body?.[0]?.trains?.[0];
-      
+
       if (!trainData || String(trainData.trainNumber) !== trainNumber) {
         throw new Error("Invalid train number");
       }
 
       setTrainName(trainData?.trainName || "");
-      
+
       const fetchedStations = trainData?.schedule?.map((s: any) => s.stationName) || [];
       setApiStations(fetchedStations);
-    
+
       if (fetchedStations.length > 0) {
         setFrom(fetchedStations[0]);
         // Set default drop station to the very last stop
         setTo(fetchedStations[fetchedStations.length - 1] || "");
       }
-      
+
       // Default to today's date
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate(new Date().toISOString().split("T")[0]);
       setTrainVerified(true);
     } catch (err) {
       console.error(err);
@@ -133,10 +143,7 @@ function Index() {
       }
       const generatedSeats: Seat[] = Array.from({ length: 12 }, (_, i) => ({
         train: `${train} ${trainName}`,
-        coach:
-          coach === "ALL"
-            ? coaches[Math.floor(Math.random() * coaches.length)]
-            : coach,
+        coach: coach === "ALL" ? coaches[Math.floor(Math.random() * coaches.length)] : coach,
         seatNumber: String(i + 1).padStart(2, "0"),
         berth: ["Lower", "Middle", "Upper", "Side Lower", "Side Upper"][
           Math.floor(Math.random() * 5)
@@ -145,16 +152,13 @@ function Index() {
         fromStation: from,
         confidence: Math.floor(Math.random() * 30) + 70,
       }));
-    
+
       setResults(generatedSeats);
       setLoading(false);
     }, 700);
   };
 
-  const emptyLine = useMemo(
-    () => EMPTY_LINES[Math.floor(Math.random() * EMPTY_LINES.length)],
-    []
-  );
+  const emptyLine = useMemo(() => EMPTY_LINES[Math.floor(Math.random() * EMPTY_LINES.length)], []);
 
   const headerStats = useMemo(
     () => [
@@ -162,7 +166,7 @@ function Index() {
       { label: "Live", value: "24×7" },
       { label: "Stations", value: "7k+" },
     ],
-    []
+    [],
   );
 
   return (
@@ -193,15 +197,11 @@ function Index() {
       {/* Hero */}
       <section className="mb-6">
         <h2 className="text-[2rem] font-black leading-[1.05] tracking-tight text-slate-100">
-          <MarkerHighlight 
-            before="Find" 
-            highlight="empty seats" 
-            after="before you board." 
-          />
+          <MarkerHighlight before="Find" highlight="empty seats" after="before you board." />
         </h2>
         <p className="text-sm text-slate-400 mt-2 leading-relaxed">
-          crowdsourced vacancy intel for Indian Railways — coach by coach,
-          station by station. no cap. 
+          crowdsourced vacancy intel for Indian Railways — coach by coach, station by station. no
+          cap.
         </p>
 
         <div className="flex gap-2 mt-4">
@@ -211,9 +211,7 @@ function Index() {
               className="flex-1 rounded-2xl border border-white/5 bg-slate-900/40 backdrop-blur-sm px-3 py-2 text-center"
             >
               <p className="text-sm font-bold text-slate-200">{s.value}</p>
-              <p className="text-[9px] uppercase tracking-widest text-slate-500">
-                {s.label}
-              </p>
+              <p className="text-[9px] uppercase tracking-widest text-slate-500">{s.label}</p>
             </div>
           ))}
         </div>
@@ -221,7 +219,6 @@ function Index() {
 
       {/* Main Search Widget */}
       <section className="rounded-2xl p-5 border border-white/5 bg-slate-950/60 backdrop-blur-md mb-7 shadow-2xl transition-all duration-300 overflow-hidden">
-        
         {/* Step 1: Train Input */}
         <Field icon={<Train className="h-4 w-4" />} label="train — drop the digits">
           <input
@@ -254,13 +251,15 @@ function Index() {
               transition={{ duration: 0.3 }}
               className="space-y-4 pt-1"
             >
-              
               {/* Route Progress Preview */}
               <RouteProgress stations={apiStations} active={from} />
 
               <div className="grid grid-cols-1 gap-3">
                 {/* Step 2A: Boarding Station (Emerald Dropdown) */}
-                <Field icon={<MapPin className="h-4 w-4" />} label="boarding stn — where u hopping on">
+                <Field
+                  icon={<MapPin className="h-4 w-4" />}
+                  label="boarding stn — where u hopping on"
+                >
                   <CustomSelect
                     value={from}
                     onChange={(val) => setFrom(val)}
@@ -270,7 +269,10 @@ function Index() {
                 </Field>
 
                 {/* Step 2B: Dropping Station (Emerald Dropdown) */}
-                <Field icon={<Flag className="h-4 w-4" />} label="dropping stn — where u getting off">
+                <Field
+                  icon={<Flag className="h-4 w-4" />}
+                  label="dropping stn — where u getting off"
+                >
                   <CustomSelect
                     value={to}
                     onChange={(val) => setTo(val)}
@@ -278,7 +280,7 @@ function Index() {
                     placeholder="Select drop station"
                   />
                 </Field>
-                
+
                 {/* Step 2C: Journey Date */}
                 <Field icon={<Calendar className="h-4 w-4" />} label="journey date — when u riding">
                   <input
@@ -337,11 +339,7 @@ function Index() {
               ? `${results.length} seats secured${coach !== "ALL" ? ` · ${coach}` : ""} 🔓`
               : "recent scans"}
           </h3>
-          {results && (
-            <span className="text-[10px] text-slate-400">
-              fresh outta the oven
-            </span>
-          )}
+          {results && <span className="text-[10px] text-slate-400">fresh outta the oven</span>}
         </div>
 
         {loading && (
@@ -365,9 +363,7 @@ function Index() {
 
         {!loading && results && results.length === 0 && (
           <div className="rounded-2xl p-6 border border-dashed border-white/10 bg-slate-900/40 backdrop-blur-sm text-center">
-            <p className="text-sm text-slate-400">
-              nah this coach cooked — try another one 
-            </p>
+            <p className="text-sm text-slate-400">nah this coach cooked — try another one</p>
           </div>
         )}
 
@@ -381,18 +377,13 @@ function Index() {
   );
 }
 
-function RouteProgress({ stations, active }: { stations: string[]; active: string; }) {
+function RouteProgress({ stations, active }: { stations: string[]; active: string }) {
   const displayStations =
     stations.length > 8
-      ? [
-          stations[0],
-          stations[Math.floor(stations.length / 2)],
-          stations[stations.length - 1],
-        ]
+      ? [stations[0], stations[Math.floor(stations.length / 2)], stations[stations.length - 1]]
       : stations;
   const activeIdx = Math.max(0, stations.indexOf(active));
-  const pct =
-    stations.length > 1 ? (activeIdx / (stations.length - 1)) * 100 : 0;
+  const pct = stations.length > 1 ? (activeIdx / (stations.length - 1)) * 100 : 0;
   return (
     <div className="mb-4 px-1">
       <div className="flex items-center gap-1.5 mb-2 text-[10px] uppercase tracking-widest text-slate-500">
@@ -409,10 +400,7 @@ function RouteProgress({ stations, active }: { stations: string[]; active: strin
           const passed = i <= activeIdx;
           const code = s.match(/\(([^)]+)\)/)?.[1] ?? s.slice(0, 3).toUpperCase();
           return (
-            <div
-              key={s}
-              className="flex flex-col items-center gap-1 flex-1 min-w-0"
-            >
+            <div key={s} className="flex flex-col items-center gap-1 flex-1 min-w-0">
               <span
                 className={`h-2 w-2 rounded-full transition-all ${
                   passed ? "bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]" : "bg-slate-800"
@@ -433,7 +421,15 @@ function RouteProgress({ stations, active }: { stations: string[]; active: strin
   );
 }
 
-function Field({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode; }) {
+function Field({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-2xl px-4 py-3 mb-3 border border-white/5 bg-slate-900/50 shadow-inner">
       <label className="text-[10px] uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1">

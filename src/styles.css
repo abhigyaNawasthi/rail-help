@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: "Plus Jakarta Sans", sans-serif;
   }
 }
 @import "tailwindcss" source(none);
@@ -98,8 +98,13 @@
   --warning: oklch(0.78 0.16 70);
   --gradient-hero: linear-gradient(135deg, oklch(0.78 0.18 70) 0%, oklch(0.68 0.2 25) 100%);
   --gradient-card: linear-gradient(145deg, oklch(0.18 0.02 260) 0%, oklch(0.12 0.018 260) 100%);
-  --gradient-bg: radial-gradient(ellipse at top, oklch(0.16 0.04 70 / 0.4), transparent 60%), radial-gradient(ellipse at bottom, oklch(0.14 0.05 25 / 0.3), transparent 60%), oklch(0.08 0.012 260);
-  --shadow-3d: 0 1px 0 oklch(1 0 0 / 0.08) inset, 0 -1px 0 oklch(0 0 0 / 0.4) inset, 0 10px 30px -10px oklch(0 0 0 / 0.6), 0 4px 12px -4px oklch(0 0 0 / 0.4);
+  --gradient-bg:
+    radial-gradient(ellipse at top, oklch(0.16 0.04 70 / 0.4), transparent 60%),
+    radial-gradient(ellipse at bottom, oklch(0.14 0.05 25 / 0.3), transparent 60%),
+    oklch(0.08 0.012 260);
+  --shadow-3d:
+    0 1px 0 oklch(1 0 0 / 0.08) inset, 0 -1px 0 oklch(0 0 0 / 0.4) inset,
+    0 10px 30px -10px oklch(0 0 0 / 0.6), 0 4px 12px -4px oklch(0 0 0 / 0.4);
   --shadow-glow: 0 0 40px -10px oklch(0.78 0.18 70 / 0.5);
   --shadow-soft: 0 8px 24px -8px oklch(0 0 0 / 0.5);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -172,5 +177,10 @@
   --color-warning: var(--warning);
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
