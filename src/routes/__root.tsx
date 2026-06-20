@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { FloatingPathsBackground } from "@/components/FloatingPaths";
 
 function NotFoundComponent() {
   return (
@@ -74,17 +75,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "rail help" },
       { name: "description", content: "Seat Scout is a mobile-first web app for finding vacant train seats." },
-      { name: "theme-color", content: "#0a0a14" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "rail help" },
+      { name: "theme-color", content: "#000000" },
+      { name: "author", content: "RailVacant" },
+      { property: "og:title", content: "RailVacant" },
       { property: "og:description", content: "Seat Scout is a mobile-first web app for finding vacant train seats." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "rail help" },
+      { name: "twitter:title", content: "RailVacant" },
       { name: "twitter:description", content: "Seat Scout is a mobile-first web app for finding vacant train seats." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b92c3ec4-b8eb-4167-8a7b-2445cf4e530a/id-preview-f850ff78--c56d85df-44d1-442a-bd18-29a6613a1ede.lovable.app-1780001331162.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b92c3ec4-b8eb-4167-8a7b-2445cf4e530a/id-preview-f850ff78--c56d85df-44d1-442a-bd18-29a6613a1ede.lovable.app-1780001331162.png" },
     ],
     links: [
       {
@@ -118,8 +116,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <FloatingPathsBackground position={1}>
+        <Outlet />
+      </FloatingPathsBackground>
     </QueryClientProvider>
   );
 }
