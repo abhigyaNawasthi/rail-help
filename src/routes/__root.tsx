@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -7,6 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 import { FloatingPathsBackground } from "@/components/FloatingPaths";
@@ -111,6 +113,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Client-side only wrapper to prevent hydration errors
+function SafeAnalytics() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+  return <Analytics />;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -119,6 +133,7 @@ function RootComponent() {
       <FloatingPathsBackground position={1}>
         <Outlet />
       </FloatingPathsBackground>
+      <SafeAnalytics />
     </QueryClientProvider>
   );
 }

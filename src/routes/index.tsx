@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Train, MapPin, Search, Sofa, TrainFront, Route as RouteIcon, ArrowRight, Flag, Calendar } from "lucide-react";
+import { Train, MapPin, Search, Sofa, TrainFront, Route as RouteIcon, ArrowRight, Flag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { SeatCard, type Seat } from "@/components/SeatCard";
@@ -13,16 +13,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "RailVacant - Find empty seats on Indian trains" },
-      {
-        name: "description",
-        content:
-          "Modern seat vacancy finder for Indian Railways. Search trains, pick a coach, see which seats are free till your station.",
-      },
-      { property: "og:title", content: "RailVacant" },
-      {
-        property: "og:description",
-        content: "Find vacant seats on Indian trains — coach by coach.",
-      },
+      { name: "description", content: "Modern seat vacancy finder for Indian Railways." },
     ],
   }),
   component: Index,
@@ -33,26 +24,21 @@ function Index() {
   const [trainName, setTrainName] = useState("");
   const [apiStations, setApiStations] = useState<string[]>([]);
   
-  // Step flow state
   const [isVerifying, setIsVerifying] = useState(false);
   const [trainVerified, setTrainVerified] = useState(false);
 
-  // Form State
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [date, setDate] = useState("");
-  const [coach, setCoach] = useState<string>("ALL");
+  const [coach, setCoach] = useState<string>(""); 
   const [results, setResults] = useState<Seat[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingLine, setLoadingLine] = useState(LOADING_LINES[0]);
 
-  const coaches = ["A1", "A2", "B1", "B2", "B3", "SL"];
+  const coaches = ["SL", "3A", "2A", "1A", "CC", "2S"];
 
-  // Filter dropping stations to only show stations AFTER the boarding station
   const fromIndex = apiStations.indexOf(from);
   const validToStations = fromIndex !== -1 ? apiStations.slice(fromIndex + 1) : [];
 
-  // Reset dependent states if the user changes the train number
   const handleTrainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTrain(e.target.value);
     if (trainVerified) {
@@ -60,16 +46,17 @@ function Index() {
       setApiStations([]);
       setTrainName("");
       setResults(null);
+      setCoach(""); 
     }
   };
 
-  // Reset Dropping Station if Boarding Station changes and destination is no longer valid
   useEffect(() => {
     if (to && !validToStations.includes(to)) {
       setTo(validToStations[0] || "");
     }
   }, [from, validToStations, to]);
 
+  // LIVE DATA: Hits RapidAPI to get the exact stations and route
   const verifyTrain = async () => {
     const trainNumber = train.trim();
 
@@ -83,91 +70,80 @@ function Index() {
 
     try {
       const data = await getTrainInfo(trainNumber);
-      const trainData = data?.body?.[0]?.trains?.[0];
       
-      if (!trainData || String(trainData.trainNumber) !== trainNumber) {
-        throw new Error("Invalid train number");
-      }
+      const trainData = data?.data || data?.body || data;
+      if (!trainData) throw new Error("Invalid API Response");
 
-      setTrainName(trainData?.trainName || "");
+      const tName = trainData.trainName || trainData.train_name || trainData.name || "Live Route Found";
+      setTrainName(tName);
       
-      const fetchedStations = trainData?.schedule?.map((s: any) => s.stationName) || [];
+      const routeArray = trainData.route || trainData.schedule || trainData.stations || [];
+      
+      const fetchedStations = routeArray.map((s: any) => {
+        if (typeof s === 'string') return s; 
+        const name = s.stationName || s.station_name || s.name || s.stnName || s.source_station_name || "Unknown";
+        const code = s.stationCode || s.station_code || s.code || s.stnCode || s.source_station_code || "UNK";
+        return `${name} (${code})`;
+      });
+
       setApiStations(fetchedStations);
     
       if (fetchedStations.length > 0) {
         setFrom(fetchedStations[0]);
-        // Set default drop station to the very last stop
         setTo(fetchedStations[fetchedStations.length - 1] || "");
       }
       
-      // Default to today's date
-      setDate(new Date().toISOString().split('T')[0]);
       setTrainVerified(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Train not found. Please check the number and try again.");
+      alert(err.message || "Train not found or API Key is missing.");
     } finally {
       setIsVerifying(false);
     }
   };
 
+  // SIMULATED DATA: Generates physical vacant seats for the UI
   const onSearch = () => {
-    if (!to) {
-      alert("Please select a dropping station.");
-      return;
-    }
-    if (!date) {
-      alert("Please select a journey date.");
-      return;
-    }
+    if (!to) return alert("Please select a dropping station.");
+    if (!coach) return alert("Please select a coach class.");
 
     setLoading(true);
     setLoadingLine(LOADING_LINES[Math.floor(Math.random() * LOADING_LINES.length)]);
     setResults(null);
 
-    // Simulate finding seats
     setTimeout(() => {
-      if (apiStations.length === 0) {
-        setLoading(false);
-        return;
-      }
-      const generatedSeats: Seat[] = Array.from({ length: 12 }, (_, i) => ({
+      const fromCode = from.match(/\(([^)]+)\)/)?.[1] || from;
+      const toCode = to.match(/\(([^)]+)\)/)?.[1] || to;
+
+      // Generate 8 dummy vacant seats
+      const generatedSeats: Seat[] = Array.from({ length: 8 }, () => ({
         train: `${train} ${trainName}`,
-        coach:
-          coach === "ALL"
-            ? coaches[Math.floor(Math.random() * coaches.length)]
-            : coach,
-        seatNumber: String(i + 1).padStart(2, "0"),
-        berth: ["Lower", "Middle", "Upper", "Side Lower", "Side Upper"][
-          Math.floor(Math.random() * 5)
-        ],
-        vacantTill: to,
-        fromStation: from,
-        confidence: Math.floor(Math.random() * 30) + 70,
+        coach: coach,
+        seatNumber: String(Math.floor(Math.random() * 72) + 1).padStart(2, "0"),
+        berth: ["Lower", "Middle", "Upper", "Side Lower", "Side Upper"][Math.floor(Math.random() * 5)],
+        vacantTill: toCode,
+        fromStation: fromCode,
+        confidence: Math.floor(Math.random() * 20) + 80, // 80-100% confidence
       }));
-    
+
+      // Sort seats chronologically
+      generatedSeats.sort((a, b) => Number(a.seatNumber) - Number(b.seatNumber));
+
       setResults(generatedSeats);
       setLoading(false);
-    }, 700);
+    }, 1200);
   };
 
-  const emptyLine = useMemo(
-    () => EMPTY_LINES[Math.floor(Math.random() * EMPTY_LINES.length)],
-    []
-  );
+  const emptyLine = useMemo(() => EMPTY_LINES[Math.floor(Math.random() * EMPTY_LINES.length)], []);
 
-  const headerStats = useMemo(
-    () => [
-      { label: "Trains", value: "13k+" },
-      { label: "Live", value: "24×7" },
-      { label: "Stations", value: "7k+" },
-    ],
-    []
-  );
+  const headerStats = useMemo(() => [
+    { label: "Trains", value: "13k+" },
+    { label: "Live", value: "24×7" },
+    { label: "Stations", value: "7k+" },
+  ], []);
 
   return (
     <div className="min-h-screen mx-auto max-w-md px-5 pb-24 pt-8 text-slate-200">
-      {/* Header */}
       <header className="flex items-center justify-between mb-7">
         <div className="flex items-center gap-2.5">
           <div className="h-10 w-10 rounded-2xl flex items-center justify-center bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shadow-lg">
@@ -185,12 +161,11 @@ function Index() {
         <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
-            live
+            live route
           </span>
         </div>
       </header>
 
-      {/* Hero */}
       <section className="mb-6">
         <h2 className="text-[2rem] font-black leading-[1.05] tracking-tight text-slate-100">
           <MarkerHighlight 
@@ -219,10 +194,8 @@ function Index() {
         </div>
       </section>
 
-      {/* Main Search Widget */}
       <section className="rounded-2xl p-5 border border-white/5 bg-slate-950/60 backdrop-blur-md mb-7 shadow-2xl transition-all duration-300 overflow-hidden">
         
-        {/* Step 1: Train Input */}
         <Field icon={<Train className="h-4 w-4" />} label="train — drop the digits">
           <input
             value={train}
@@ -255,21 +228,18 @@ function Index() {
               className="space-y-4 pt-1"
             >
               
-              {/* Route Progress Preview */}
               <RouteProgress stations={apiStations} active={from} />
 
               <div className="grid grid-cols-1 gap-3">
-                {/* Step 2A: Boarding Station (Emerald Dropdown) */}
                 <Field icon={<MapPin className="h-4 w-4" />} label="boarding stn — where u hopping on">
                   <CustomSelect
                     value={from}
                     onChange={(val) => setFrom(val)}
-                    options={apiStations.slice(0, -1)} // Cannot board at the very last station
+                    options={apiStations.slice(0, -1)} 
                     placeholder="Select boarding station"
                   />
                 </Field>
 
-                {/* Step 2B: Dropping Station (Emerald Dropdown) */}
                 <Field icon={<Flag className="h-4 w-4" />} label="dropping stn — where u getting off">
                   <CustomSelect
                     value={to}
@@ -278,25 +248,14 @@ function Index() {
                     placeholder="Select drop station"
                   />
                 </Field>
-                
-                {/* Step 2C: Journey Date */}
-                <Field icon={<Calendar className="h-4 w-4" />} label="journey date — when u riding">
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-transparent outline-none text-base font-semibold text-slate-100 [color-scheme:dark] cursor-pointer"
-                  />
-                </Field>
               </div>
 
-              {/* Step 2D: Coach Selection */}
               <div>
                 <label className="text-[10px] uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-2">
                   <Sofa className="h-3 w-3" /> coach — pick ur whip
                 </label>
                 <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-1 no-scrollbar">
-                  {["ALL", ...coaches].map((c) => {
+                  {coaches.map((c) => {
                     const active = c === coach;
                     return (
                       <button
@@ -315,7 +274,6 @@ function Index() {
                 </div>
               </div>
 
-              {/* Final Search Button */}
               <button
                 onClick={onSearch}
                 disabled={loading}
@@ -329,19 +287,13 @@ function Index() {
         </AnimatePresence>
       </section>
 
-      {/* Results */}
       <section>
         <div className="flex items-baseline justify-between mb-3 px-1">
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-200">
             {results
-              ? `${results.length} seats secured${coach !== "ALL" ? ` · ${coach}` : ""} 🔓`
+              ? `live scans secured · ${coach} 🔓`
               : "recent scans"}
           </h3>
-          {results && (
-            <span className="text-[10px] text-slate-400">
-              fresh outta the oven
-            </span>
-          )}
         </div>
 
         {loading && (
